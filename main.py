@@ -200,6 +200,8 @@ class Welcome(Base):
 class Login(Base):
 
     def get(self):
+        if self.user:
+            return self.redirect('/welcome')
         self.render('login-form.html')
 
     def post(self):
@@ -305,6 +307,8 @@ class NewPost(Base):
             self.redirect('/login')
 
     def post(self):
+        if not self.user:
+            return self.redirect('/login')
         title = self.request.get('title')
         art = self.request.get('art')
         error = ''
@@ -322,11 +326,154 @@ class NewPost(Base):
             self.redirect('/%s' % obj.key().id())
 
 
-class Recent(Base):
-
+class unlikeRecent(Base):
     def get(self, id):
         key = db.Key.from_path('Post', int(id))
         post = db.get(key)
+        if not post:
+            return self.redirect('/login')
+        countLikes = Like.countLike(str(post.key().id()))
+        countUnlikes = Unlike.countLike(str(post.key().id()))
+        comment_get = db.GqlQuery(
+            "select * from Comment where pid = '%s'" % str(post.key().id()))
+        if not self.user:
+            return self.redirect('/login')
+        key = db.Key.from_path('Post', int(id))
+        post = db.get(key)
+        if not post:
+            return self.redirect('/login')
+        countLikes = Like.countLike(str(post.key().id()))
+        countUnlikes = Unlike.countLike(str(post.key().id()))
+
+        comment_get = Comment.com(str(post.key().id()))
+        if not self.user:
+                self.redirect("/login")
+
+        elif post.user_id == str(self.user.key().id()):
+                return self.redirect('/%s' % post.key().id())
+        else:
+                if Unlike.count(
+                    str(post.key().id()),
+                    str(
+                        self.user.key().id())) == 1:
+
+                    return self.redirect('/%s' % post.key().id())
+                else:
+                    obj = Unlike(
+                        pid=str(post.key().id()),
+                        uid=str(
+                            self.user.key().id()))
+                    obj.put()
+                    time.sleep(0.1)
+                    self.redirect("/%s" % post.key().id())
+
+
+class delRecent(Base):
+    def get(self, id):
+        key = db.Key.from_path('Post', int(id))
+        post = db.get(key)
+        if not post:
+            return self.redirect('/login')
+        countLikes = Like.countLike(str(post.key().id()))
+        countUnlikes = Unlike.countLike(str(post.key().id()))
+        comment_get = db.GqlQuery(
+            "select * from Comment where pid = '%s'" % str(post.key().id()))
+        if not self.user:
+            return self.redirect('/login')
+        key = db.Key.from_path('Post', int(id))
+        post = db.get(key)
+        if not post:
+            return self.redirect('/login')
+        countLikes = Like.countLike(str(post.key().id()))
+        countUnlikes = Unlike.countLike(str(post.key().id()))
+
+        comment_get = Comment.com(str(post.key().id()))
+
+        if self.user and (post.user_id == str(self.user.key().id())):
+                post.delete()
+                time.sleep(0.1)
+                self.redirect('/blog')
+        else:
+                return self.redirect('/%s' % post.key().id())
+
+
+class likeRecent(Base):
+    def get(self, id):
+        key = db.Key.from_path('Post', int(id))
+        post = db.get(key)
+        if not post:
+            return self.redirect('/login')
+        countLikes = Like.countLike(str(post.key().id()))
+        countUnlikes = Unlike.countLike(str(post.key().id()))
+        comment_get = db.GqlQuery(
+            "select * from Comment where pid = '%s'" % str(post.key().id()))
+        if not self.user:
+            return self.redirect('/login')
+        key = db.Key.from_path('Post', int(id))
+        post = db.get(key)
+        if not post:
+            return self.redirect('/login')
+        countLikes = Like.countLike(str(post.key().id()))
+        countUnlikes = Unlike.countLike(str(post.key().id()))
+
+        comment_get = Comment.com(str(post.key().id()))
+        if not self.user:
+                self.redirect("/login")
+
+        elif post.user_id == str(self.user.key().id()):
+                return self.redirect('/%s' % post.key().id())
+
+        else:
+                if Like.count(
+                    str(post.key().id()),
+                    str(
+                        self.user.key().id())) >= 1:
+
+                    return self.redirect('/%s' % post.key().id())
+                else:
+                    obj = Like(
+                        pid=str(post.key().id()),
+                        uid=str(
+                            self.user.key().id()))
+                    obj.put()
+                    time.sleep(0.1)
+                    self.redirect("/%s" % post.key().id())
+
+
+class editRecent(Base):
+    def get(self, id):
+        key = db.Key.from_path('Post', int(id))
+        post = db.get(key)
+        if not post:
+            return self.redirect('/login')
+        countLikes = Like.countLike(str(post.key().id()))
+        countUnlikes = Unlike.countLike(str(post.key().id()))
+        comment_get = db.GqlQuery(
+            "select * from Comment where pid = '%s'" % str(post.key().id()))
+        if not self.user:
+            return self.redirect('/login')
+        key = db.Key.from_path('Post', int(id))
+        post = db.get(key)
+        if not post:
+            return self.redirect('/login')
+        countLikes = Like.countLike(str(post.key().id()))
+        countUnlikes = Unlike.countLike(str(post.key().id()))
+
+        comment_get = Comment.com(str(post.key().id()))
+        if not self.user:
+                self.redirect('/login')
+        if self.user and post.user_id == str(self.user.key().id()):
+                self.redirect('/edit/%s' % post.key().id())
+        else:
+                return self.redirect('/%s' % post.key().id())
+
+
+class Recent(Base):
+    def get(self, id):
+        key = db.Key.from_path('Post', int(id))
+        post = db.get(key)
+        if not post:
+            return self.redirect('/login')
         countLikes = Like.countLike(str(post.key().id()))
         countUnlikes = Unlike.countLike(str(post.key().id()))
         comment_get = \
@@ -336,109 +483,27 @@ class Recent(Base):
                     countUnlikes=countUnlikes, comment_get=comment_get)
 
     def post(self, id):
-
         if not self.user:
             self.redirect('/login')
         key = db.Key.from_path('Post', int(id))
         post = db.get(key)
+        if not post:
+            return self.redirect('/login')
         countLikes = Like.countLike(str(post.key().id()))
         countUnlikes = Unlike.countLike(str(post.key().id()))
 
         comment_get = Comment.com(str(post.key().id()))
         if self.request.get('delete'):
-            if self.user and post.user_id == str(self.user.key().id()):
-                post.delete()
-                time.sleep(0.1)
-                self.redirect('/blog')
-            else:
-                self.render(
-                    'Post1.html',
-                    post=post,
-                    error='You cant edit this post',
-                    countLikes=countLikes,
-                    countUnlikes=countUnlikes,
-                    comment_get=comment_get,
-                    )
+            return self.redirect('/delRecent/%s' % post.key().id())
 
         if self.request.get('edit'):
-            if not self.user:
-                self.redirect('/login')
-            if self.user and post.user_id == str(self.user.key().id()):
-                self.redirect('/edit/%s' % post.key().id())
-            else:
-                self.render(
-                    'Post1.html',
-                    post=post,
-                    error='You cant Edit this Post!!',
-                    countLikes=countLikes,
-                    countUnlikes=countUnlikes,
-                    comment_get=comment_get,
-                    )
-
-        if self.request.get('like'):
-            if not self.user:
-                self.redirect('/login')
-            if post.user_id == str(self.user.key().id()):
-                self.render(
-                    'Post1.html',
-                    post=post,
-                    error='Cant like your own post!',
-                    countLikes=countLikes,
-                    countUnlikes=countUnlikes,
-                    comment_get=comment_get,
-                    )
-            else:
-
-                if Like.count(str(post.key().id()),
-                              str(self.user.key().id())) >= 1:
-
-                    self.render(
-                        'Post1.html',
-                        post=post,
-                        error='Cant like your this post again!',
-                        countLikes=countLikes,
-                        countUnlikes=countUnlikes,
-                        comment_get=comment_get,
-                        )
-                else:
-                    obj = Like(pid=str(post.key().id()),
-                               uid=str(self.user.key().id()))
-                    obj.put()
-                    time.sleep(0.1)
-                    self.redirect('/%s' % post.key().id())
+            return self.redirect('/editRecent/%s' % post.key().id())
 
         if self.request.get('unlike'):
-            if not self.user:
-                self.redirect('/login')
-            if post.user_id == str(self.user.key().id()):
-                self.render(
-                    'Post1.html',
-                    post=post,
-                    error='Cant unlike your own post!',
-                    countLikes=countLikes,
-                    countUnlikes=countUnlikes,
-                    comment_get=comment_get,
-                    )
-            else:
+            return self.redirect('/unlikeRecent/%s' % post.key().id())
 
-                if Unlike.count(str(post.key().id()),
-                                str(self.user.key().id())) == 1:
-
-                    self.render(
-                        'Post1.html',
-                        post=post,
-                        error='Cant unlike your this post again!',
-                        countLikes=countLikes,
-                        countUnlikes=countUnlikes,
-                        comment_get=comment_get,
-                        )
-                else:
-                    obj = Unlike(pid=str(post.key().id()),
-                                 uid=str(self.user.key().id()))
-                    obj.put()
-                    time.sleep(0.1)
-                    self.redirect('/%s' % post.key().id())
-
+        if self.request.get('like'):
+            return self.redirect('/likeRecent/%s' % post.key().id())
         if self.request.get('comment'):
             if not self.user:
                 self.redirect('/login')
@@ -474,6 +539,8 @@ class CommentEdit(Base):
 
         ckey = db.Key.from_path('Comment', int(id))
         comment = db.get(ckey)
+        if not comment:
+            return self.redirect('/login')
         newcomment = self.request.get('comm')
         if self.user and comment.uid == str(self.user.key().id()):
             comment.text = newcomment
@@ -490,12 +557,16 @@ class CommentDelete(Base):
     def get(self, id):
         ckey = db.Key.from_path('Comment', int(id))
         comment = db.get(ckey)
+        if not comment:
+            return self.redirect('/login')
         self.render('Commentdelete.html', comment=comment)
 
     def post(self, id):
 
         ckey = db.Key.from_path('Comment', int(id))
         comment = db.get(ckey)
+        if not comment:
+            return self.redirect('/login')
         newcomment = self.request.get('comm')
         if self.user and comment.uid == str(self.user.key().id()):
             comment.delete()
@@ -516,6 +587,8 @@ class Edit(Base):
     def post(self, id):
         key = db.Key.from_path('Post', int(id))
         post = db.get(key)
+        if not post:
+            return self.redirect('/login')
         title = self.request.get('title')
         art = self.request.get('art')
 
@@ -529,10 +602,16 @@ class Edit(Base):
             self.redirect('/%s' % post.key().id())
         else:
             self.render('edit.html', post=post,
-                        error='User cant submit blank!!')
+                        error='User cant submit blank .')
+
+
+class Start(Base):
+    def get(self):
+        self.redirect('/blog')
 
 
 app = webapp2.WSGIApplication([
+    ('/', Start),
     ('/Sign', Sign),
     ('/welcome', Welcome),
     ('/register', Register),
@@ -544,4 +623,8 @@ app = webapp2.WSGIApplication([
     ('/edit/([0-9]+)', Edit),
     ('/Commentedit/([0-9]+)', CommentEdit),
     ('/Commentdelete/([0-9]+)', CommentDelete),
+    ('/delRecent/([0-9]+)', delRecent),
+    ('/editRecent/([0-9]+)', editRecent),
+    ('/likeRecent/([0-9]+)', likeRecent),
+    ('/unlikeRecent/([0-9]+)', unlikeRecent)
     ], debug=True)
