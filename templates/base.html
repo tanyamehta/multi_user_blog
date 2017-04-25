@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>CS253 Blog</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+    <style type="text/css">
+    
+    body{
+        
+        background-size: 100% 100%; 
+        padding-left: 70px;
+        background-attachment: fixed;
+        background-image: url("https://images5.alphacoders.com/374/374293.jpg");
+
+
+    }
+    
+   h1{
+    color: black;
+   }
+    textarea{
+        height: 200px;
+        width: 70%;
+        font-size: 17px;
+        font-family: monospace;
+    
+    }
+    .t{
+        color: black;
+    }
+    .titles{
+        text-decoratcolor: black;
+        width: 70%;
+        height: 50px;
+    }
+    input[type=text] {
+        width: 500px;
+        font-size: 20px;
+        padding: 2px;
+        font-family: monospace;
+    }
+       input[type=submit] {
+        font-size: 24px;
+}
+    input[type=password] {
+    width: 500px;
+    font-size: 20px;
+    padding: 2px;
+    font-family: monospace;
+}
+
+ ul {
+    list-style-type: none;
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+    background-color: #333;
+}
+
+li {
+    float: left;
+}
+
+li a {
+    display: block;
+    color: white;
+    text-align: center;
+    padding: 14px 16px;
+    text-decoration: none;
+}
+
+li a:hover {
+    background-color: #111;
+}   
+
+    </style>
+</head>
+
+<body>
+     <div class="container" >
+   <ul>
+  <li><a class="active" href="/blog">Tanya's Blog</a></li>
+  {% if not user %}
+  <li><a href="/login">Login</a></li>
+  <li><a href="/register">Register</a></li>
+  {% else %}
+  <li><a href="/newpost">Add a post</a></li>
+  <li><a href="/logout">Logout</a></li>
+  {%endif%}
+</ul>
+   
+    {%block content%}
+    {%endblock%}
+   </div>
+</body>
+</html>
